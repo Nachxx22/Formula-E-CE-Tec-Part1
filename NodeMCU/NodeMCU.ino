@@ -27,11 +27,9 @@
  * Este servidor no funciona correctamente en las redes del TEC,
  * se recomienda crear un hotspot con el celular
  */
-const char* ssid = "WiFiCar";
-const char* password = "pass1234";
-
-
-// servidor con el puerto y variable con la maxima cantidad de 
+const char* ssid = "Nacho";
+const char* password = "21012101";
+   // servidor con el puerto y variable con la maxima cantidad de 
 
 WiFiServer server(PORT);
 WiFiClient serverClients[MAX_SRV_CLIENTS];
@@ -146,7 +144,7 @@ void setup() {
  * Función principal que llama a las otras funciones y recibe los mensajes del cliente
  * Esta función comprueba que haya un nuevo mensaje y llama a la función de procesar
  * para interpretar el mensaje recibido.
- */
+ */ 
 void loop() {
   
   unsigned long currentMillis = millis();
