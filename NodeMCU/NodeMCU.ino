@@ -152,6 +152,12 @@ int right=0;
 int up=0;
 int down=0;
 
+const int waitTime = 2000;
+const int speed = 600;
+
+const int pinMotorA[3] = {EnA,In1,In2};
+const int pinMotorB[3] = {EnB,In3,In4};
+
 void loop() {
   
   unsigned long currentMillis = millis();
@@ -255,7 +261,7 @@ String implementar(String llave, String valor){
    * La variable result puede cambiar para beneficio del desarrollador
    * Si desea obtener más información al ejecutar un comando.
    */
- 
+  int y=0;
   String result="ok;";
   Serial.print("Comparing llave: ");
   Serial.println(llave);
@@ -263,16 +269,23 @@ String implementar(String llave, String valor){
     if(valor.toInt()==0){
     digitalWrite(In1,LOW);
     digitalWrite(In2,LOW);
+
+    analogWrite(EnA,0);
     result="Quieto";
     }
     else if(valor.toInt()>0){
-      result="avanzando";
       digitalWrite(In1,LOW);
       digitalWrite(In2,HIGH);
+
+      analogWrite(EnA,valor.toInt());
+      result="avanzando";
     }
-    else{
-      digitalWrite(In1,HIGH);
-      digitalWrite(In2,LOW);
+    else if(valor.toInt()<0){
+      digitalWrite (In1,HIGH);
+      digitalWrite (In2,LOW);
+      
+      y = -(valor.toInt());
+      analogWrite (EnA,y);
       result="retrocediendo";
     }
     Serial.print("Move....: ");
@@ -297,6 +310,21 @@ String implementar(String llave, String valor){
         break;
     }
   }
+    else if(llave=="patron"){
+      if(valor=="circulo"){
+      result=" Realizando patrón circular";
+      }
+      else if(llave=="infinito"){
+        result="Realizando patrón infinito";
+      }
+      else if(llave=="zigzag"){
+        result="Realizando patrón zigzag";
+      }
+      else if(llave=="especial"){
+        result="Realizando patrón especial";
+      }
+
+    }
   else if(llave[0] == 'l'){
     Serial.println("Cambiando Luces");
     Serial.print("valor luz: ");
@@ -311,14 +339,14 @@ String implementar(String llave, String valor){
       //# AGREGAR CÓDIGO PARA ENCENDER LUCES FRONTALES
       if(valor=="1"){
         up = 1;
-        data = data & 0b10111101;
+        data = data & 0b11001111;
         result = "Leds frontales encendidas";
         Serial.println("Luces frontales");
       }
        else if(valor=="0"){
         if(left==1 || right==1 || down==1){
         up = 0;
-        data = data ^ 0b10111101;
+        data = data ^ 0b11001111;
         data = data ^ 0b11111111;
         result = "Leds frontales apagadas";
         Serial.println("Luces frontales");
@@ -337,14 +365,14 @@ String implementar(String llave, String valor){
       //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR LUCES TRASERAS
       if(valor=="1"){
         down = 1;
-        data = data & 0b11001111;
+        data = data & 0b11111100;
         result = "Leds traseras encendidas";
         Serial.println("Luces traseras");
       }
        else if(valor=="0"){
         if(left==1 || right==1 || up==1){
         down = 0;
-        data = data ^ 0b11001111;
+        data = data ^ 0111111100;
         data = data ^ 0b11111111;
         result = "Leds traseras apagadas";
         Serial.println("Luces traseras");
@@ -395,7 +423,7 @@ String implementar(String llave, String valor){
         right = 0;
         data = data ^ 0b11111011;
         data = data ^ 0b11111111;
-        result = "Leds frontales apagadas";
+        result = "Leds derecha apagada";
         Serial.println("Luces frontales");
          }
          else{
