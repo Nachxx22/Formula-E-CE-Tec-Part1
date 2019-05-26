@@ -46,7 +46,7 @@ const long interval = 100;
  * Pin donde está conectado el sensor de luz
  * Señal digital, lee 1 si hay luz y 0 si no hay.
  */
-#define ldr D7
+#define ldr D7 
 /**
  * Variables para manejar las luces con el registro de corrimiento.
  * Utilizan una función propia de Arduino llamada shiftOut.
@@ -78,8 +78,8 @@ const long interval = 100;
 #define In1 D3 // D4 en HIGH : retroceder
 #define In2 D2 // D3 en HIGH : avanzar
 #define In3 D1 // 
-#define EnB D0 // 
-#define In4 D5 // 0 para ir hacia adelante
+#define EnB D5 // 
+#define In4 D0 // 0 para ir hacia adelante
 
 
 /**
@@ -151,6 +151,7 @@ int left=0;
 int right=0;
 int up=0;
 int down=0;
+int v=0;
 
 const int waitTime = 2000;
 const int speed = 600;
@@ -295,52 +296,117 @@ String implementar(String llave, String valor){
   
  
   else if(llave == "dir"){
-    switch (valor.toInt()){
-      case 1:
+      if(valor.toInt()==1){
         digitalWrite(In3,LOW);
         digitalWrite(In4,HIGH);
 
-        analogWrite(EnB,680);
+        analogWrite(EnB,900);
+        delay(500);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
         Serial.println("Girando derecha");
         result = "Girando derecha";
+      }
         //CÓDIGO PARA GIRAR DERECHA
-        break;
-      case -1:
-        digitalWrite(In3,LOW);
-        digitalWrite(In4,HIGH);
+      else if(valor.toInt()==-1){
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
 
-        analogWrite(EnB,680);
+        analogWrite(EnB,1023);
         Serial.println("Girando izquierda");
         result = "Girando izquierda";
+      }
        
         
         //CÓDIGO PARA GIRAR IZQUIERDA
-        break;
-       default:
+       
+       else if(valor.toInt()==0){
         Serial.println("directo");
         digitalWrite(In3,LOW);
         digitalWrite(In4,LOW);
 
         analogWrite(EnB,0);
         result = "directo";
+       }
         //CÓDIGO PARA NO GIRAR 
-        break;
+        else{
+        result = "no funca";
+    }
+  }
+  else if(llave=="test"){
+    v = digitalRead(ldr);
+    if(v == HIGH){
+      digitalWrite(In2,HIGH);
+      digitalWrite(In3,LOW);
+      analogWrite(EnA,800);
+      result="luz";
+    }
+    else{
+      digitalWrite(In2,LOW);
+      digitalWrite(In3,LOW);
+      analogWrite(EnA,0);
+      result="sin luz";
     }
   }
     else if(llave=="patron"){
       if(valor=="circulo"){
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,800);
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        delay(7000);
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
       result=" Realizado patrón circular";
       }
-      else if(llave=="infinite"){
+      else if(valor=="infinite"){
         result="Realizado patrón infinite";
       }
-      else if(llave=="zigzag"){
+      else if(valor=="zigzag"){
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,850);
+        delay(500);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1900);
+        delay(5000);
+        /*digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        delay(5000);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1023);
+        delay(5000);
+        */
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
         result="Realizado patrón zigzag";
       }
-      else if(llave=="especial"){
+      else if(valor=="especial"){
         result="Realizado patrón especial";
       }
-
     }
   else if(llave[0] == 'l'){
     Serial.println("Cambiando Luces");
@@ -382,14 +448,14 @@ String implementar(String llave, String valor){
       //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR LUCES TRASERAS
       if(valor=="1"){
         down = 1;
-        data = data & 0b11111100;
+        data = data & 0b00111111;
         result = "Leds traseras encendidas";
         Serial.println("Luces traseras");
       }
        else if(valor=="0"){
         if(left==1 || right==1 || up==1){
         down = 0;
-        data = data ^ 0111111100;
+        data = data ^ 0b001111111;
         data = data ^ 0b11111111;
         result = "Leds traseras apagadas";
         Serial.println("Luces traseras");

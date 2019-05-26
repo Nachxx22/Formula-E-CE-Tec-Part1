@@ -27,7 +27,6 @@ import tkinter.scrolledtext as tkscrolled
 ##### Biblioteca para el Carro
 from WiFiClient import NodeMCU
 
-
 #           ____________________________
 #__________/Ventana Principal
 root=Tk()
