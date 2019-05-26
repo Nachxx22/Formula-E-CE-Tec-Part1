@@ -29,7 +29,9 @@
  */
 const char* ssid = "Nacho";
 const char* password = "21012101";
-   // servidor con el puerto y variable con la maxima cantidad de 
+
+
+// servidor con el puerto y variable con la maxima cantidad de 
 
 WiFiServer server(PORT);
 WiFiClient serverClients[MAX_SRV_CLIENTS];
@@ -44,7 +46,7 @@ const long interval = 100;
  * Pin donde está conectado el sensor de luz
  * Señal digital, lee 1 si hay luz y 0 si no hay.
  */
-#define ldr D7
+#define ldr D7 
 /**
  * Variables para manejar las luces con el registro de corrimiento.
  * Utilizan una función propia de Arduino llamada shiftOut.
@@ -76,9 +78,8 @@ const long interval = 100;
 #define In1 D3 // D4 en HIGH : retroceder
 #define In2 D2 // D3 en HIGH : avanzar
 #define In3 D1 // 
-#define EnB D0 // 
-#define In4 D5 // 0 para ir hacia adelante
-
+#define EnB D5 // 
+#define In4 D0 // 0 para ir hacia adelante
 
 
 /**
@@ -144,7 +145,20 @@ void setup() {
  * Función principal que llama a las otras funciones y recibe los mensajes del cliente
  * Esta función comprueba que haya un nuevo mensaje y llama a la función de procesar
  * para interpretar el mensaje recibido.
- */ 
+ */
+byte data= 0b11111111;
+int left=0;
+int right=0;
+int up=0;
+int down=0;
+int v=0;
+
+const int waitTime = 2000;
+const int speed = 600;
+
+const int pinMotorA[3] = {EnA,In1,In2};
+const int pinMotorB[3] = {EnB,In3,In4};
+
 void loop() {
   
   unsigned long currentMillis = millis();
@@ -197,6 +211,8 @@ void loop() {
  * Esta función es semejante a string.split(char) de python
  * 
  */
+
+
 void procesar(String input, String * output){
   //Buscamos el delimitador ;
   Serial.println("Checking input....... ");
@@ -246,53 +262,261 @@ String implementar(String llave, String valor){
    * La variable result puede cambiar para beneficio del desarrollador
    * Si desea obtener más información al ejecutar un comando.
    */
+  int y=0;
   String result="ok;";
   Serial.print("Comparing llave: ");
   Serial.println(llave);
   if(llave == "pwm"){
+    if(valor.toInt()==0){
+    digitalWrite(In1,LOW);
+    digitalWrite(In2,LOW);
+
+    analogWrite(EnA,0);
+    result="Detenido";
+    }
+    else if(valor.toInt()>0){
+      digitalWrite(In1,LOW);
+      digitalWrite(In2,HIGH);
+
+      analogWrite(EnA,valor.toInt());
+      result="Avanzando";
+    }
+    else if(valor.toInt()<0){
+      digitalWrite (In1,HIGH);
+      digitalWrite (In2,LOW);
+      
+      y = -(valor.toInt());
+      analogWrite (EnA,y);
+      result="Retrocediendo";
+    }
     Serial.print("Move....: ");
     Serial.println(valor);
-    //# AGREGAR PARA CÓDIGO PARA MOVER EL CARRO HACIA DELANTE Y ATRAS
+    //# CÓDIGO PARA MOVER EL CARRO HACIA DELANTE Y ATRAS
   }
+  
  
   else if(llave == "dir"){
-    switch (valor.toInt()){
-      case 1:
+      if(valor.toInt()==1){
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+
+        analogWrite(EnB,900);
+        delay(500);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
         Serial.println("Girando derecha");
-        //# AGREGAR CÓDIGO PARA GIRAR DERECHA
-        break;
-      case -1:
+        result = "Girando derecha";
+      }
+        //CÓDIGO PARA GIRAR DERECHA
+      else if(valor.toInt()==-1){
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+
+        analogWrite(EnB,1023);
         Serial.println("Girando izquierda");
-        //# AGREGAR CÓDIGO PARA GIRAR IZQUIERDA
-        break;
-       default:
+        result = "Girando izquierda";
+      }
+       
+        
+        //CÓDIGO PARA GIRAR IZQUIERDA
+       
+       else if(valor.toInt()==0){
         Serial.println("directo");
-        //# AGREGAR CÓDIGO PARA NO GIRAR 
-        break;
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+
+        analogWrite(EnB,0);
+        result = "directo";
+       }
+        //CÓDIGO PARA NO GIRAR 
+        else{
+        result = "no funca";
     }
   }
+  else if(llave=="test"){
+    v = digitalRead(ldr);
+    if(v == HIGH){
+      digitalWrite(In2,HIGH);
+      digitalWrite(In3,LOW);
+      analogWrite(EnA,800);
+      result="luz";
+    }
+    else{
+      digitalWrite(In2,LOW);
+      digitalWrite(In3,LOW);
+      analogWrite(EnA,0);
+      result="sin luz";
+    }
+  }
+    else if(llave=="patron"){
+      if(valor=="circulo"){
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,800);
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        delay(7000);
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+      result=" Realizado patrón circular";
+      }
+      else if(valor=="infinite"){
+        result="Realizado patrón infinite";
+      }
+      else if(valor=="zigzag"){
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,850);
+        delay(500);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1900);
+        delay(5000);
+        /*digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        delay(5000);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1023);
+        delay(5000);
+        */
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        delay(750);
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        result="Realizado patrón zigzag";
+      }
+      else if(valor=="especial"){
+        result="Realizado patrón especial";
+      }
+    }
   else if(llave[0] == 'l'){
     Serial.println("Cambiando Luces");
     Serial.print("valor luz: ");
     Serial.println(valor);
-    byte data = B00000000;
+    
+    
+   
     //Recomendación utilizar operadores lógico de bit a bit (bitwise operators)
     switch (llave[1]){
+    
       case 'f':
+      //# AGREGAR CÓDIGO PARA ENCENDER LUCES FRONTALES
+      if(valor=="1"){
+        up = 1;
+        data = data & 0b11001111;
+        result = "Leds frontales encendidas";
         Serial.println("Luces frontales");
-        //# AGREGAR CÓDIGO PARA ENCENDER LUCES FRONTALES
+      }
+       else if(valor=="0"){
+        if(left==1 || right==1 || down==1){
+        up = 0;
+        data = data ^ 0b11001111;
+        data = data ^ 0b11111111;
+        result = "Leds frontales apagadas";
+        Serial.println("Luces frontales");
+         }
+         else{
+         up = 0;
+         data = data | 0b11111111;
+         result = "Leds frontales apagadas";
+         Serial.println("Luces frontales");
+          }
+        
+      }
+      
         break;
       case 'b':
+      //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR LUCES TRASERAS
+      if(valor=="1"){
+        down = 1;
+        data = data & 0b00111111;
+        result = "Leds traseras encendidas";
         Serial.println("Luces traseras");
-        //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR LUCES TRASERAS
+      }
+       else if(valor=="0"){
+        if(left==1 || right==1 || up==1){
+        down = 0;
+        data = data ^ 0b001111111;
+        data = data ^ 0b11111111;
+        result = "Leds traseras apagadas";
+        Serial.println("Luces traseras");
+         }
+         else{
+         down = 0;
+         data= data | 0b11111111;
+         result = "Leds traseras apagadas";
+         Serial.println("Luces traseras");
+          }
+       }
         break;
       case 'l':
+      //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL IZQUIERDA
+       if(valor=="1"){
+        left = 1;
+        down = data & 0b11110111;
+        result = "Led izquierda encendida";
         Serial.println("Luces izquierda");
-        //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL IZQUIERDA
+      }
+       else if(valor=="0"){
+        if(right==1 || up==1 || down==1){
+          left = 0;
+          data = data ^ 0b11110111;
+          data = data ^ 0b11111111; 
+          result = "Led izquierda apagadas";  
+          Serial.println("Luces frontales");       
+          }
+        else{
+        left = 0;
+        data= data | 0b11111111;
+        result = "Led izquierda apagadas";
+        Serial.println("Luces izquierda");
+       }
+       }
+        
         break;
       case 'r':
+      //# AGREGAR PARA CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL DERECHA
+       if(valor=="1"){
+        right = 1;
+        data = data & 0b11111011;
+        result = "Led derecha encendida";
         Serial.println("Luces derechas");
-        //# AGREGAR PARA CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL DERECHA
+       }
+       else if(valor=="0"){
+        if(right==1 || up==1 || down==1){
+        right = 0;
+        data = data ^ 0b11111011;
+        data = data ^ 0b11111111;
+        result = "Leds derecha apagada";
+        Serial.println("Luces frontales");
+         }
+         else{
+         right = 0;
+         data= data | 0b11111111;
+         result = "Leds frontales apagadas";
+         Serial.println("Luces frontales");
+          }
+        
+      }
         break;
       /**
        * # AGREGAR CASOS CON EL FORMATO l[caracter]:valor;
@@ -303,9 +527,10 @@ String implementar(String llave, String valor){
         
         break;
     }
+     shiftOut(ab, clk, LSBFIRST, data);
     //data VARIABLE QUE DEFINE CUALES LUCES SE ENCIENDEN Y CUALES SE APAGAN
-    shiftOut(ab, clk, LSBFIRST, data);
   }
+  
   /**
    * El comando tiene el formato correcto pero no tiene sentido para el servidor
    */
@@ -314,6 +539,7 @@ String implementar(String llave, String valor){
     Serial.println(result);
   }
   return result;
+  
 }
 
 /**
