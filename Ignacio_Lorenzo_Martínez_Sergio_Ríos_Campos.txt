@@ -1,0 +1,21 @@
+Ruta del git 
+https://github.com/Njdream/Formula-E-CE-Tec-Part1
+
+Restricciones:
+Python 3.7 obligatorio
+
+
+
+Nombre del Wifi: Nacho
+Password: 21012101
+
+
+Estudiantes:
+Ignacio Lorenzo Martínez
+Sergio Ríos Campos
+
+
+Hay un archivo adicional de texto el cual contiene como se tiene que 
+mandar la data para encender las luces y también contiene de como encender
+los motores para que avance,retroceda, gire a a la izquierda o derecha
+Tiene como nombre: Data y Motores

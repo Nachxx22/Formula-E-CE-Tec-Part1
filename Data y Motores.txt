@@ -1,0 +1,15 @@
+Izquierda                         Derecha
+B10111111                         In3 LOW  In4 HIGH
+
+
+
+Derecha                           Izquierda
+B01111111                        In3 HIGH  In4 LOW
+
+
+Frontales                         Avanza
+B11001111                        In1 LOW   In2  HIGH
+
+
+Traseras                          Reversa
+B11110011                       In1 HIGH In2 LOW
