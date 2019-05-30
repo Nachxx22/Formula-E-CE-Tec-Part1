@@ -29,6 +29,17 @@
  */
 const char* ssid = "Nacho";
 const char* password = "21012101";
+//const int A = 1000;
+//const int B = 15;
+//const int Rc = 10;
+
+int v;
+int analogv;
+int vb;
+int r;
+String analoogv;
+//int ilum;
+//int testingnum;
 
 
 // servidor con el puerto y variable con la maxima cantidad de 
@@ -60,6 +71,7 @@ const long interval = 100;
  */
 #define ab  D6 
 #define clk D8
+#define vba A0
 /*
  * Variables para controlar los motores.
  * EnA y EnB son los que habilitan las salidas del driver.
@@ -107,6 +119,7 @@ void setup() {
   pinMode(ab,OUTPUT);
   
   pinMode(ldr,INPUT);
+  pinMode(vba,INPUT);
 
   // ip estática para el servidor
   IPAddress ip(192,168,43,200);
@@ -146,18 +159,19 @@ void setup() {
  * Esta función comprueba que haya un nuevo mensaje y llama a la función de procesar
  * para interpretar el mensaje recibido.
  */
-byte data= 0b11111111;
+byte data= B11111111;
 int left=0;
 int right=0;
 int up=0;
 int down=0;
-int v=0;
+//int v=0;
+//int vb=0;
 
-const int waitTime = 2000;
-const int speed = 600;
+//const int waitTime = 2000;
+//const int speed = 600;
 
-const int pinMotorA[3] = {EnA,In1,In2};
-const int pinMotorB[3] = {EnB,In3,In4};
+//const int pinMotorA[3] = {EnA,In1,In2};
+//const int pinMotorB[3] = {EnB,In3,In4};
 
 void loop() {
   
@@ -299,12 +313,7 @@ String implementar(String llave, String valor){
       if(valor.toInt()==1){
         digitalWrite(In3,LOW);
         digitalWrite(In4,HIGH);
-
-        analogWrite(EnB,900);
-        delay(500);
-        digitalWrite(In3,LOW);
-        digitalWrite(In4,LOW);
-        analogWrite(EnB,0);
+        analogWrite(EnB,850);
         Serial.println("Girando derecha");
         result = "Girando derecha";
       }
@@ -313,7 +322,7 @@ String implementar(String llave, String valor){
         digitalWrite(In3,HIGH);
         digitalWrite(In4,LOW);
 
-        analogWrite(EnB,1023);
+        analogWrite(EnB,850);
         Serial.println("Girando izquierda");
         result = "Girando izquierda";
       }
@@ -334,78 +343,215 @@ String implementar(String llave, String valor){
         result = "no funca";
     }
   }
-  else if(llave=="test"){
-    v = digitalRead(ldr);
-    if(v == HIGH){
-      digitalWrite(In2,HIGH);
-      digitalWrite(In3,LOW);
-      analogWrite(EnA,800);
-      result="luz";
+  else if(llave == "datos"){ 
+    if(valor = "luz"){
+    int v = analogRead(ldr);
+      if(v == 1023){
+      result = v ;
     }
     else{
-      digitalWrite(In2,LOW);
-      digitalWrite(In3,LOW);
-      analogWrite(EnA,0);
-      result="sin luz";
+      result = v;
     }
+  }
   }
     else if(llave=="patron"){
       if(valor=="circulo"){
+        result= "Realizando patrón circular";
         digitalWrite(In1,LOW);
         digitalWrite(In2,HIGH);
-        analogWrite(EnA,800);
-        digitalWrite(In3,HIGH);
-        digitalWrite(In4,LOW);
+        analogWrite(EnA,1023);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
         analogWrite(EnB,1023);
-        delay(7000);
+        data = B01001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(15000);
         digitalWrite(In1,LOW);
         digitalWrite(In2,LOW);
         analogWrite(EnA,0);
         digitalWrite(In3,LOW);
         digitalWrite(In4,LOW);
         analogWrite(EnB,0);
-      result=" Realizado patrón circular";
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
       }
       else if(valor=="infinite"){
-        result="Realizado patrón infinite";
-      }
-      else if(valor=="zigzag"){
         digitalWrite(In1,LOW);
         digitalWrite(In2,HIGH);
-        analogWrite(EnA,850);
-        delay(500);
+        analogWrite(EnA,1023);
         digitalWrite(In3,LOW);
         digitalWrite(In4,HIGH);
-        analogWrite(EnB,1900);
-        delay(5000);
-        /*digitalWrite(In3,LOW);
+        analogWrite(EnA,1023);
+        data = B01001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(200);
+        digitalWrite(In3,LOW);
         digitalWrite(In4,LOW);
         analogWrite(EnB,0);
-        delay(750);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(2000);
         digitalWrite(In3,HIGH);
         digitalWrite(In4,LOW);
         analogWrite(EnB,1023);
-        delay(5000);
+        data= B10001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3800);
         digitalWrite(In3,LOW);
         digitalWrite(In4,LOW);
-        analogWrite(EnB,0);
-        delay(750);
+        analogWrite(EnB,1023);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(2000);
         digitalWrite(In3,LOW);
         digitalWrite(In4,HIGH);
         analogWrite(EnB,1023);
-        delay(5000);
-        */
+        data = B01001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3800);
         digitalWrite(In3,LOW);
         digitalWrite(In4,LOW);
-        analogWrite(EnB,0);
-        delay(750);
+        analogWrite(EnB,1023);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(2000);
         digitalWrite(In1,LOW);
         digitalWrite(In2,LOW);
         analogWrite(EnA,0);
-        result="Realizado patrón zigzag";
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        result="Realizando patrón infinite";
+      }
+      else if(valor=="zigzag"){
+        result="Realizando patrón zigzag";
+        //Adelante
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,1023);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(500);
+        //adelante y derecha
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1023);
+        data = B01001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(2000);
+        //directo
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data= B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(750);
+        //Adelante e izquierda
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        data = B10001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3500);
+        //directo
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(750);
+        //Adelante y derecha
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1023);
+        data= B01001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3000);
+        //Directo
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(500);
+        // detenido
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
       }
       else if(valor=="especial"){
-        result="Realizado patrón especial";
+        //adelante
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,1023);
+        data = B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3500);
+        //detenido
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(500);
+        //Reversa y derecha
+        digitalWrite(In1,HIGH);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,1023);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,HIGH);
+        analogWrite(EnB,1023);
+        data= B01110011;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3500);
+        //detenido
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(500);
+        //avanza
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,1023);
+        data =B11001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3000);
+        //detenido
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(1000);
+        //Avanzando  y derecha
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,HIGH);
+        analogWrite(EnA,1023);
+        digitalWrite(In3,HIGH);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,1023);
+        data= B10001111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        delay(3500);
+        // acabo
+        digitalWrite(In1,LOW);
+        digitalWrite(In2,LOW);
+        analogWrite(EnA,0);
+        digitalWrite(In3,LOW);
+        digitalWrite(In4,LOW);
+        analogWrite(EnB,0);
+        data = B11111111;
+        shiftOut(ab, clk, LSBFIRST, data);
+        result="Realizando patrón especial";
       }
     }
   else if(llave[0] == 'l'){
@@ -422,25 +568,22 @@ String implementar(String llave, String valor){
       //# AGREGAR CÓDIGO PARA ENCENDER LUCES FRONTALES
       if(valor=="1"){
         up = 1;
-        data = data & 0b11001111;
-        result = "Leds frontales encendidas";
+        data = data & B11001111;
+        result = "Leds Frontales encendidas";
         Serial.println("Luces frontales");
       }
        else if(valor=="0"){
         if(left==1 || right==1 || down==1){
         up = 0;
-        data = data ^ 0b11001111;
-        data = data ^ 0b11111111;
+        data = data ^ B11001111;
+        data = data ^ B11111111;
         result = "Leds frontales apagadas";
         Serial.println("Luces frontales");
          }
-         else{
-         up = 0;
-         data = data | 0b11111111;
-         result = "Leds frontales apagadas";
-         Serial.println("Luces frontales");
+        else{
+          data = data | B11111111;
+          result = "Leds frontales apagadas";
           }
-        
       }
       
         break;
@@ -448,72 +591,66 @@ String implementar(String llave, String valor){
       //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR LUCES TRASERAS
       if(valor=="1"){
         down = 1;
-        data = data & 0b00111111;
+        data = data & B11110011;
         result = "Leds traseras encendidas";
         Serial.println("Luces traseras");
       }
        else if(valor=="0"){
-        if(left==1 || right==1 || up==1){
+        if(left==1 || left==1 || up==1){
         down = 0;
-        data = data ^ 0b001111111;
-        data = data ^ 0b11111111;
+        data = data ^ B11110011;
+        data = data ^ B11111111;
         result = "Leds traseras apagadas";
         Serial.println("Luces traseras");
          }
          else{
-         down = 0;
-         data= data | 0b11111111;
-         result = "Leds traseras apagadas";
-         Serial.println("Luces traseras");
+          data = data | B11111111;
+          result = "Led traseras apagadas";
+         }
           }
-       }
         break;
       case 'l':
       //# AGREGAR CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL IZQUIERDA
-       if(valor=="1"){
+         if(valor=="1"){
         left = 1;
-        down = data & 0b11110111;
+        data = data & B10111111;
         result = "Led izquierda encendida";
         Serial.println("Luces izquierda");
       }
        else if(valor=="0"){
         if(right==1 || up==1 || down==1){
           left = 0;
-          data = data ^ 0b11110111;
-          data = data ^ 0b11111111; 
-          result = "Led izquierda apagadas";  
+          data = data ^ B10111111;
+          data = data ^ B11111111; 
+          result = "Led izquierda apagada";  
           Serial.println("Luces frontales");       
           }
-        else{
-        left = 0;
-        data= data | 0b11111111;
-        result = "Led izquierda apagadas";
-        Serial.println("Luces izquierda");
-       }
-       }
+          else{
+          data = data | B11111111;
+          result = "Led izquierda apagada";
+          }
+          }
         
         break;
       case 'r':
       //# AGREGAR PARA CÓDIGO PARA ENCENDER O APAGAR DIRECCIONAL DERECHA
-       if(valor=="1"){
+        if(valor=="1"){
         right = 1;
-        data = data & 0b11111011;
+        data = data & B01111111;
         result = "Led derecha encendida";
         Serial.println("Luces derechas");
        }
        else if(valor=="0"){
-        if(right==1 || up==1 || down==1){
+        if(left==1 || up==1 || down==1){
         right = 0;
-        data = data ^ 0b11111011;
-        data = data ^ 0b11111111;
-        result = "Leds derecha apagada";
+        data = data ^ B01111111;
+        data = data ^ B11111111;
+        result = "led derecha encendida";
         Serial.println("Luces frontales");
          }
          else{
-         right = 0;
-         data= data | 0b11111111;
-         result = "Leds frontales apagadas";
-         Serial.println("Luces frontales");
+          data = data | B11111111;
+          result = "Led derecha apagada";
           }
         
       }
@@ -530,6 +667,20 @@ String implementar(String llave, String valor){
      shiftOut(ab, clk, LSBFIRST, data);
     //data VARIABLE QUE DEFINE CUALES LUCES SE ENCIENDEN Y CUALES SE APAGAN
   }
+    else if(llave = "bateria"){
+    vb = analogRead(vba);
+
+   /*
+    * 
+    * 
+    * 
+    */
+    analogv = (((1023/100)*vb)/100)-8;
+    //analogv = ((100/6)*vb)/165;
+    analoogv= analogv;
+    result = analoogv + "%";
+    // 1023/100*analogv/100 formula para el porcentaje de bateria
+    }
   
   /**
    * El comando tiene el formato correcto pero no tiene sentido para el servidor
